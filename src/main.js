@@ -1,7 +1,13 @@
 import Vue from 'vue'
 import App from './App.vue'
 
-export const EventBus = new Vue()
+export const eventBus = new Vue({
+  methods: {
+    addLog(logObj) {
+      this.$emit('logAdded', logObj)
+    }
+  }
+})
 
 new Vue({
   el: '#app',

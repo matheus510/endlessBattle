@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { EventBus } from '../../main.js'
+import { eventBus } from '../../main.js'
 import battleHelpers from '../../battle/battleHelpers'
 
 const battleIsOn = battleHelpers.battleIsOn
@@ -77,13 +77,13 @@ export default {
         }
     },
     methods: {
-        monsterAttack: function () {
+        monsterAttack() {
             if (battleIsOn(this.matchInProgress, this.player.hp)) {
                 let monsterDamage = calculateDamage(1, this.monster.attack)
                 this.player.hp -= monsterDamage
 
                 let logMessage = `${this.monster.name} caused ${monsterDamage} points of damage to ${this.player.name}`
-                this.logs.push({message: logMessage, from: 'monster'})
+                this.logEmitted({message: logMessage, from: 'monster'})
                 
                 //check if player is dead
                 if (this.player.hp <= 0) {
@@ -92,13 +92,13 @@ export default {
                 }
             }
         },
-        playerAttack: function () {
+        playerAttack() {
             if (this.matchInProgress === true && this.monster.hp > 0) {
                 let playerDamage = calculateDamage(1, this.player.attack)
                 this.monster.hp -= playerDamage
 
                 let logMessage = `${this.player.name} caused ${playerDamage} points of damage to ${this.monster.name}`
-                this.logs.push({message: logMessage, from: 'player'})
+                this.logEmitted({message: logMessage, from: 'player'})
                 if (this.monster.hp <= 0) {
                     alert('YOU BEAT THIS MONSTER')
                     this.matchInProgress = false
@@ -106,13 +106,13 @@ export default {
                 this.monsterAttack()
             }
         },
-        playerSpecialAttack: function () {
+        playerSpecialAttack() {
             if (this.matchInProgress === true && this.monster.hp > 0) {
                 let playerDamage = calculateDamage(10, (this.player.attack * 1.5))
                 this.monster.hp -= playerDamage
     
                 let logMessage = `${this.player.name} caused ${playerDamage} points of damage to ${this.monster.name} with an SPECIAL ATTACK! AAAAAAARGH`
-                this.logs.push({message: logMessage, from: 'player'})
+                this.logEmitted({message: logMessage, from: 'player'})
                 if (this.monster.hp <= 0) {
                     alert('YOU BEAT THIS MONSTER')
                     this.matchInProgress = false
@@ -120,32 +120,33 @@ export default {
                 this.monsterAttack()
             }
         },
-        playerHeal: function () {
+        playerHeal() {
             if (this.matchInProgress === true) {
                 let playerHeal = Math.floor(Math.random() * (this.player.attack * 0.5)) + 1
                 this.player.hp += playerHeal
     
                 let logMessage = `${this.player.name} healed ${playerHeal} health points!`
-                this.logs.push({message: logMessage, from: 'player'})
+                this.logEmitted({message: logMessage, from: 'player'})
                 this.monsterAttack()
             }
         },
-        playerRun: function () {
+        playerRun() {
             this.matchInProgress = false
         },
-        startMatch: function () {
+        startMatch() {
             this.matchInProgress = true
             this.monster = this.monsterArray[Math.floor(Math.random()*this.monsterArray.length)]
             this.player.hp = this.player.health
             this.monster.hp = this.monster.health
             this.logs = []
+        },
+        logEmitted(logObj) {
+            eventBus.$emit('newLog', logObj)
         }
     },
     computed: {
         playerHP() {
-            let fullHP = this.player.health
-
-            let percentageHP = (this.player.hp * 100) / fullHP
+            let percentageHP = (this.player.hp * 100) / this.player.health
 
             if (percentageHP <= 0) {
                 this.player.hp = 0
@@ -157,9 +158,7 @@ export default {
             }
         },
         monsterHP() {
-            let fullHP = this.monster.health
-
-            let percentageHP = (this.monster.hp * 100) / fullHP
+            let percentageHP = (this.monster.hp * 100) / this.monster.health
 
             if (percentageHP <= 0) {
                 this.monster.hp = 0

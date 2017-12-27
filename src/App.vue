@@ -1,11 +1,12 @@
 <template>
   <div id="app">
     <battle-interface :selectedPlayer="player" :providedMonsterArray="monsterArray"></battle-interface>
+    <battle-log></battle-log>
   </div>
 </template>
 
 <script>
-import { EventBus } from './main.js'
+import { eventBus } from './main.js'
 import BattleInterface from './battle/components/BattleInterface.vue'
 import BattleLog from './battle/components/BattleLog.vue'
 

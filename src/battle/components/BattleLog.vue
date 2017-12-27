@@ -2,8 +2,8 @@
       <section class="row log" v-if="logs[0]">
         <div class="small-12 columns">
             <ul>
-                <li :class="logCondition"
-                    :v-for="log in logs">
+                <li v-for="(log, i) in logs"
+                    :class="{'monster-turn': (log.from === 'monster'), 'player-turn': (log.from === 'player')}">
                     {{ log.message }}
                 </li>
             </ul>
@@ -12,8 +12,19 @@
 </template>
 
 <script>
-export default {
+import { eventBus } from '../../main.js'
 
+export default {
+    data: () => {
+        return {
+            logs: []
+        }
+    },
+    created() {
+        eventBus.$on('newLog', (logObj) => {
+            this.logs.push(logObj)
+        })
+    }
 }
 </script>
 
